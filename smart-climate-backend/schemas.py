@@ -2,6 +2,10 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 # --- System Settings ---
 class SystemSettingBase(BaseModel):
     key: str

@@ -5,9 +5,19 @@ from typing import List, Optional
 import models, schemas
 from database import SessionLocal, engine
 
+from fastapi.middleware.cors import CORSMiddleware
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -34,6 +44,21 @@ def process_business_logic(measurement: models.Measurement, db: Session):
         )
         db.add(alert)
         db.commit()
+
+@app.post("/login")
+def login(creds: schemas.LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.username == creds.username).first()
+    # У реальному проєкті тут має бути хешування, зараз для простоти пряме порівняння
+    if not user or user.hashed_password != creds.password:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    if user.is_blocked:
+        raise HTTPException(status_code=403, detail="User is blocked")
+        
+    return {
+        "id": user.id,
+        "username": user.username,
+        "role": user.role
+    }
 
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
