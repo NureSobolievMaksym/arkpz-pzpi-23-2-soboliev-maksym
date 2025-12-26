@@ -9,11 +9,19 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
+    role = Column(String, default="user")
+    is_blocked = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     homes = relationship("Home", back_populates="owner")
     audit_logs = relationship("AuditLog", back_populates="user")
+
+class SystemSetting(Base):
+    __tablename__ = "system_settings"
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, index=True)
+    value = Column(String)
+    description = Column(String, nullable=True)
 
 class Home(Base):
     __tablename__ = "homes"
@@ -57,7 +65,6 @@ class Measurement(Base):
     temperature = Column(Float, nullable=True)
     humidity = Column(Float, nullable=True)
     co2_level = Column(Float, nullable=True)
-    power_usage = Column(Float, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     device_id = Column(Integer, ForeignKey("devices.id"))
     
