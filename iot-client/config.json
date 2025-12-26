@@ -1,0 +1,6 @@
+{
+    "server_url": "http://localhost:8000",
+    "device_id": 1,
+    "update_interval": 5,
+    "simulation_mode": true
+}
